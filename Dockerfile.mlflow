@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+ENV PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_DEFAULT_TIMEOUT=100
+
+RUN pip install --upgrade pip && \
+    pip install mlflow==2.10.0 psycopg2-binary==2.9.9
+
+EXPOSE 5000
+
+CMD mlflow server \
+    --backend-store-uri postgresql://mlflow:mlflow123@postgres:5432/mlflow_db \
+    --default-artifact-root s3://mlflow/artifacts \
+    --host 0.0.0.0 \
+    --port 5000 \
+    --workers 2

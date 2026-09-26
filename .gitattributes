@@ -1,0 +1,4 @@
+# DVC Git attributes
+*.csv.dvc filter=dvc diff=true
+*.parquet.dvc filter=dvc diff=true
+*.dvc filter=dvc diff=true

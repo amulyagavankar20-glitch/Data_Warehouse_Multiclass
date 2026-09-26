@@ -1,59 +1,161 @@
-# 🏥 Multi-Class Disease Detection & Advanced Anomaly Detection (Early Warning System)
+# Disease Anomaly Early-Warning System
 
-An advanced, production-grade clinical intelligence and predictive modeling framework designed to detect multi-class disease sublabels and provide early-stage sub-clinical risk warnings through unsupervised anomaly detection.
+## Architecture
 
----
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Docker Compose (local-first)                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│  ┌───────────┐  ┌──────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐ │
+│  │ PostgreSQL │──│ MLflow   │──│ FastAPI │──│Prom-    │──│ Grafana │ │
+│  │ (Backend)  │  │ (Tracking│  │ (Serving│  │ etheus  │  │ (Dashboards)│ │
+│  │            │  │ +Registry)│  │ API)   │  │         │  │          │ │
+│  └───────────┘  └──────────┘  └─────────┘  └─────────┘  └─────────┘ │
+│         │              │          │                                 │
+│         └─── DVC ──────┴── Prefect (Orchestration)                  │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
 
-## 🌟 Project Architecture & Core Pillars
+   Data: DVC-tracked CSV (280K rows)
+   Training: Prefect flow → MLflow logging → Model registry
+   Serving: FastAPI loads model from MLflow Production stage
+   Monitoring: Prometheus + Grafana for API metrics, Evidently AI for drift
+```
 
-This repository is structured around a **4-Core Methodological Framework** bridging classic data science storytelling with state-of-the-art AIML anomaly detection:
+## Overview
 
-### Phase I: Data Engineering & Prevention of Data Leakage
-* **Clinical Data Hygiene:** Cleaned duplicate hospital registry logs and safely parsed multi-class comma-delimited disease indicator flags into structured binary columns.
-* **Leakage-Free Preprocessing:** Performed stratified splitting upfront to preserve rare disease class proportions. All scaling parameters (`StandardScaler`) are derived exclusively from the training population to prevent test set data leakage.
+This project implements a full MLOps stack for multi-class disease detection and anomaly detection:
 
-### Phase II: Unsupervised Baseline Profiling (The Anomaly Engine)
-* **The Clinical Premise:** True early-warning systems must identify deviation from health rather than relying solely on known disease tags.
-* **Model Selection:** Trained **Isolation Forest**, **One-Class SVM**, and **Deep Autoencoders** *strictly* on healthy baseline patients (`label == 'Normal'`) to learn the compressed latent distribution of a normal physiological profile.
+| Component | Technology |
+|---|---|
+| Experiment tracking | MLflow (PostgreSQL backend, local artifact store) |
+| Orchestration | Prefect 3 |
+| Model serving | FastAPI + Uvicorn |
+| Data versioning | DVC |
+| Dependency management | Poetry |
+| Code quality | ruff, black, mypy, pre-commit |
+| Testing | pytest with 80%+ coverage gate |
+| Monitoring | Prometheus + Grafana |
+| Drift detection | Evidently AI |
 
-### Phase III: Sub-Clinical Validation & Imbalance Handling
-* **Avoiding SMOTE (Clinical Integrity):** Artificial synthesis of clinical biomarkers (e.g., blood pressure, glucose, HbA1c) can violate human biological laws. Class imbalance is handled entirely via stratified sampling, cost-sensitive learning weights, and reconstruction error analysis.
-* **Early Warning Audit:** Evaluated whether high reconstruction errors or anomaly scores appear in patients marked with early-stage combinations (e.g., hypertension `HY`, diabetes `DI`) before full-blown clinical manifestation.
+## Key Design Decision: Target Leakage Fix
 
-### Phase IV: Hybrid Meta-Feature Supervised Classifier
-* **Closing the Loop:** Unsupervised anomaly outputs (Isolation Forest decision functions and Autoencoder MSE) are treated as powerful **meta-features**.
-* **Final Multi-Class Prediction:** Meta-features are concatenated with original biomarkers and fed into an ensemble classifier (`RandomForestClassifier` with balanced class weights) to accurately predict multi-class disease sublabels.
+The original notebook achieved ~1.00 precision/recall/F1 — explained by `disease_flags` directly encoding the sublabel. This refactor **drops all leakage columns**:
 
----
+- `disease_flags` — comma-delimited string encoding disease state
+- `hypertension` — binary indicator (0/1)
+- `heart_disease` — binary indicator (0/1)
+- `diabetes` — Yes/No indicator
 
-## 📊 Empirical Results & Early Warning Audit
+**Expected realistic accuracy: 85-95%** (not 1.00). Honest metrics on a real problem are more valuable.
 
-When tested on the independent test split ($\approx 55,700$ records), our unsupervised models successfully captured disease severity gradients:
+## Quick Start
 
-| Disease Sublabel | Record Count | Mean Isolation Forest Score (Lower = More Abnormal) | Mean Autoencoder MSE (Higher = More Abnormal) | Clinical Inference |
-| :--- | :--- | :--- | :--- | :--- |
-| **`DI_HY`** (Diabetes + Hypertension) | 13,381 | **0.0035** | 0.1031 | Highest structural deviation (severe multi-morbidity) |
-| **`DI`** (Diabetes Only) | 6,390 | 0.0213 | 0.0674 | High anomaly score |
-| **`HY`** (Hypertension Only) | 13,829 | 0.0283 | 0.0570 | High anomaly score |
-| **`DI_HT_HY`** (Triple Co-morbidity) | 181 | 0.0341 | **0.3778** | Extreme reconstruction error |
-| **`N`** (Healthy Baseline Normals) | 20,930 | **0.1060** | **0.0034** | Safely recognized as normal baseline |
+```bash
+# Install dependencies
+make install
 
-The hybrid meta-feature augmented **Random Forest Classifier** achieved near-perfect multi-class classification metrics ($1.00$ Precision, Recall, and F1-Score) across all target diagnostic classes.
+# Start MLflow UI (local)
+make mlflow-ui
 
----
+# Run the training pipeline
+make train
 
-## ⚙️ Tech Stack & Requirements
-* **Language:** Python 3.x
-* **Data Processing:** Pandas, NumPy
-* **Machine Learning:** Scikit-Learn (Isolation Forest, One-Class SVM, Random Forest)
-* **Deep Learning:** TensorFlow / Keras (Deep Autoencoders)
-* **Visualization:** Matplotlib, Seaborn
+# Start the API server
+make serve
 
----
+# Run tests
+make test
 
-## 🚀 Getting Started
+# Lint
+make lint
+```
 
-1. Clone the repository:
-   ```bash
-   git clone [https://github.com/your-username/disease-anomaly-early-warning.git](https://github.com/your-username/disease-anomaly-early-warning.git)
-   cd disease-anomaly-early-warning
+### Docker Compose (All Services)
+
+```bash
+docker compose up -d
+```
+
+Services:
+- **PostgreSQL** (port 5432): MLflow backend store
+- **MLflow** (port 5000): Tracking + model registry UI
+- **API** (port 8000): FastAPI serving
+- **Prefect** (port 4200): Pipeline orchestration
+- **Prometheus** (port 9090): Metrics collection
+- **Grafana** (port 3000): Dashboards (admin/admin123)
+
+## API Endpoints
+
+### `GET /health`
+Check service health and model loading status.
+
+### `POST /predict`
+Predict disease sublabel from patient biomarkers.
+
+```json
+{
+  "age": 45, "age_normalized": 0.45, "bmi": 25.5,
+  "HbA1c_level": 6.0, "glucose": 120, "cholesterol": 200,
+  "sleep_hours": 7.5, "triglycerides": 150,
+  "crp_level": 3.0, "homocysteine_level": 12,
+  "systolic_bp": 120, "diastolic_bp": 80,
+  "blood_pressure": 120, "alcohol_intake": 2,
+  "salt_intake": 5, "heart_rate": 70, "hdl": 50, "ldl": 100,
+  "age_level": "Middle", "gender": "Female",
+  "bmi_level": "Normal", "smoking": "Never",
+  "physical_activity": "Medium", "family_history": "No",
+  "stress_level": "Medium", "low_hdl_cholesterol": "No",
+  "high_ldl_cholesterol": "No", "high_blood_pressure": "No",
+  "sugar_consumption": "Medium", "education_level": "Bachelor",
+  "employment_status": "Employed"
+}
+```
+
+### `POST /anomaly-score`
+Score patient biomarkers for anomaly using isolation forest, one-class SVM, and autoencoder.
+
+### `GET /metrics`
+Prometheus-format metrics (request count, latency, error rate).
+
+## Project Structure
+
+```
+┌── .github/workflows/     CI/CD pipelines
+├─  .grafana/              Grafana dashboards + provisioning
+├─  data/                  Data (DVC-tracked)
+├─  src/                   Source package
+│   ├─  config.py          Pydantic-settings configuration
+│   ├─  data/              Data loading, validation, splitting
+│   ├─  features/          Feature engineering (encoding, scaling)
+│   ├─  models/            Anomaly detection + classifier
+│   ├─  api/               FastAPI application + schemas
+│   └─  utils/             MLflow logging utilities
+├─  flows/                 Prefect training flow
+├─  tests/                 pytest test suite
+├─  Dockerfile             Multi-stage API image
+├─  docker-compose.yml     All services
+├─  dvc.yaml               DVC pipeline stages
+├─  pyproject.toml          Dependencies + tool config
+├─  run_pipeline.py         CLI entrypoint
+└─  Makefile               Convenience targets
+```
+
+## Data Pipeline
+
+1. **Extract**: Load CSV via DVC
+2. **Validate**: Schema, nulls, physiological ranges, class distribution
+3. **Preprocess**: Drop leakage columns → ordinal encode → one-hot encode → StandardScaler (fit on train only) → stratified 80/20 split
+4. **Train Anomaly**: Isolation Forest + One-Class SVM + Deep Autoencoder on Normal cohort
+5. **Compute Meta-features**: iso_score, ae_mse from anomaly models
+6. **Train Classifier**: RandomForest on biomarkers + meta-features
+7. **Evaluate**: Classification report, confusion matrix, ROC-AUC
+8. **Log to MLflow**: Parameters, metrics, artifacts, model registry
+9. **Register**: Transition model to Staging
+
+## Environment Requirements
+
+- Python 3.10+
+- Docker + Docker Compose v2
+- DVC (`pip install dvc`)

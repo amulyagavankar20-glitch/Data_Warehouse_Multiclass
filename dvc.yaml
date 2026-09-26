@@ -1,0 +1,45 @@
+# DVC pipeline stages for the disease anomaly pipeline
+
+stages:
+  load:
+    cmd: python -c "from src.data.loader import load_raw_data, clean_data; load_raw_data(); print('Data loaded')"
+    deps:
+      - data/Data Warehouse Multiclass.csv.dvc
+    outs:
+      - data/processed/raw_loaded.csv
+
+  preprocess:
+    cmd: python -c "from src.data.loader import load_raw_data, clean_data; from src.data.splitter import split_data; from src.features.engineering import fit_transform_train; df = clean_data(load_raw_data()); split = split_data(df); _, X_train_enc, X_test_enc = fit_transform_train(split); X_train_enc.to_parquet('data/processed/X_train.parquet'); X_test_enc.to_parquet('data/processed/X_test.parquet')"
+    deps:
+      - src/data/loader.py
+      - src/data/splitter.py
+      - src/features/engineering.py
+      - data/Data Warehouse Multiclass.csv.dvc
+    outs:
+      - data/processed/X_train.parquet
+      - data/processed/X_test.parquet
+
+  train:
+    cmd: python run_pipeline.py
+    deps:
+      - flows/training_flow.py
+      - src/models/anomaly/autoencoder.py
+      - src/models/anomaly/isolation_forest.py
+      - src/models/anomaly/one_class_svm.py
+      - src/models/classifier.py
+      - src/models/evaluator.py
+      - src/utils/mlflow_utils.py
+    outs:
+      - models/model.joblib
+    metrics:
+      - metrics.json:
+          cache: false
+
+  evaluate_drift:
+    cmd: python -c "from src.models.evaluator import compute_drift_score; print('Drift evaluation complete')"
+    deps:
+      - src/models/evaluator.py
+      - data/processed/X_train.parquet
+    metrics:
+      - metrics_drift.json:
+          cache: false

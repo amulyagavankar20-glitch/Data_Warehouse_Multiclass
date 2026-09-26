@@ -1,0 +1,68 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Disease Anomaly API Metrics",
+    "tags": ["disease-anomaly", "api"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "type": "stat",
+        "title": "Total Requests",
+        "dataSource": "Prometheus",
+        "targets": [
+          {
+            "expr": "sum(http_requests_total)",
+            "legendFormat": "Total Requests"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4}
+      },
+      {
+        "id": 2,
+        "type": "graph",
+        "title": "Request Latency",
+        "dataSource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(http_request_duration_seconds_sum[5m]) / rate(http_request_duration_seconds_count[5m])",
+            "legendFormat": "Avg Latency"
+          }
+        ],
+        "gridPos": {"x": 6, "y": 0, "w": 12, "h": 6}
+      },
+      {
+        "id": 3,
+        "type": "graph",
+        "title": "Request Rate by Endpoint",
+        "dataSource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{endpoint}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 6, "w": 18, "h": 6}
+      },
+      {
+        "id": 4,
+        "type": "stat",
+        "title": "Error Count (5xx)",
+        "dataSource": "Prometheus",
+        "targets": [
+          {
+            "expr": "sum(http_requests_total{status=~\"5..\"})",
+            "legendFormat": "Errors"
+          }
+        ],
+        "gridPos": {"x": 18, "y": 6, "w": 6, "h": 6}
+      }
+    ],
+    "schemaVersion": 38,
+    "version": "1.0.0",
+    "refresh": "10s"
+  },
+  "folderId": 0,
+  "overwrite": true
+}
