@@ -225,8 +225,8 @@ flowchart LR
 | Service | Image | Persistent volume |
 | :-- | :-- | :-- |
 | `postgres` | `postgres:16-alpine` | `postgres_data` |
-| `mlflow` | `Dockerfile.mlflow` (MLflow 2.22.5) | `mlflow_artifacts` (proxied, no S3 needed) |
-| `prefect` | `prefecthq/prefect:3.8.8-python3.11` | `prefect_data` |
+| `mlflow` | `Dockerfile.mlflow` (MLflow 3.17.2) | `mlflow_artifacts` (proxied, no S3 needed) |
+| `prefect` | `prefecthq/prefect:3.9.1-python3.11` | `prefect_data` |
 | `trainer` / `api` | `Dockerfile` (non-root, uv-locked) | bind mounts `./models`, `./reports` |
 | `prometheus` | `prom/prometheus:v2.54.1` | `prometheus_data` |
 | `grafana` | `grafana/grafana:11.2.2` | `grafana_data` |

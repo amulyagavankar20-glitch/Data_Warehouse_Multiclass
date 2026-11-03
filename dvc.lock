@@ -17,8 +17,8 @@ stages:
       size: 1368
     - path: src/config.py
       hash: md5
-      md5: 8353117dea072727f6639fcff6c29f72
-      size: 5589
+      md5: cc49938577deaa77053ca8dd5929ffc5
+      size: 5609
     - path: src/data
       hash: md5
       md5: 0513cf39a67e5ad5327685079b84e540.dir
@@ -47,11 +47,11 @@ stages:
     outs:
     - path: models/bundle.joblib
       hash: md5
-      md5: 83bdbb75ed39a9fc8fd098aa96883b0a
-      size: 14103913
+      md5: dca96c4a9e9ce7501c40575e003a74fd
+      size: 14104013
     - path: models/serving_contract.json
       hash: md5
-      md5: 5ae1310ee46615f18644a8a352e0d99e
+      md5: f4096d99334e9ce941aa551f3179dad0
       size: 4544
     - path: reports/anomaly_audit.json
       hash: md5

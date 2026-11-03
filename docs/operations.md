@@ -20,7 +20,7 @@ variable of the same name (case-insensitive) or in `.env`.
 
 | Variable | Default | Purpose |
 | :-- | :-- | :-- |
-| `MLFLOW_TRACKING_URI` | `file:<repo>/mlruns` | Tracking server / registry |
+| `MLFLOW_TRACKING_URI` | `sqlite:///<repo>/mlflow.db` (artifacts in `<repo>/mlartifacts`) | Tracking server / registry |
 | `MODEL_URI` | *(unset)* | Serve from the registry, e.g. `models:/disease-anomaly-classifier@champion` |
 | `MODEL_DIR` | `<repo>/models` | Local bundle location when `MODEL_URI` is unset |
 | `MIN_TEST_MACRO_AUC` | `0.90` | Quality gate |
@@ -28,6 +28,7 @@ variable of the same name (case-insensitive) or in `.env`.
 | `ENABLE_MLFLOW` | `true` | Disable tracking for offline runs |
 | `ENVIRONMENT` | `development` | Tagged on every MLflow run |
 | `POSTGRES_*`, `GRAFANA_ADMIN_PASSWORD` | see `.env.example` | Compose stack credentials |
+| `MLFLOW_ALLOWED_HOSTS` | `mlflow,mlflow:5000,localhost,…` | Host headers the MLflow server accepts; add your domain when exposing it |
 
 > [!CAUTION]
 > The defaults in `docker-compose.yml` and `.env.example` are for local use only.

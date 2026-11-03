@@ -6,6 +6,23 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Security
+
+- Upgraded MLflow 2.22.5 → **3.17.2**, fixing six critical CVEs flagged by
+  the Trivy gate (CVE-2025-15036, CVE-2025-15379, CVE-2026-0596,
+  CVE-2026-2635, CVE-2026-2651, CVE-2026-4035): path traversal, command
+  injection in model serving, authentication bypass and credential
+  exfiltration.
+
+### Changed
+
+- Local tracking moved from the `./mlruns` file store (refused by MLflow 3)
+  to SQLite (`mlflow.db`), with artifacts in `mlartifacts/`.
+- scikit-learn 1.6.1 → 1.9.1; Prefect 3.8.8 → 3.9.1 (client and Compose
+  server). The FastAPI `<0.155` pin is no longer needed.
+- GitHub Actions moved to Node 24 releases: checkout v7, setup-uv v10.3.3,
+  upload-artifact v7, buildx v4, build-push v7, login v4, metadata v6.
+
 ### Added
 
 - `LICENSE` (MIT; the dataset is excluded), `CODE_OF_CONDUCT.md`, `SECURITY.md`,
@@ -15,6 +32,15 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- The CI `docker` job could not start: the `aquasecurity/trivy-action@0.28.0`
+  tag no longer exists. It now uses `v0.36.0` and scans for vulnerabilities
+  only (secret scanning of the virtualenv took about 9 minutes and produced
+  only noise).
+- The MLflow container would have crash-looped: `--expose-prometheus` needs
+  `prometheus-flask-exporter`, which MLflow 3 no longer bundles.
+- MLflow 3 rejects requests whose `Host` header is `mlflow:5000`, which
+  would have blocked the trainer and API inside Compose. The server now
+  passes `--allowed-hosts` (configurable via `MLFLOW_ALLOWED_HOSTS`).
 - On Windows checkouts (`core.autocrlf=true`) DVC saw every file as changed,
   because CRLF bytes changed the content hashes. Line endings are now
   normalised to LF.

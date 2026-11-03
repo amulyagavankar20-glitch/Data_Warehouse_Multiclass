@@ -49,6 +49,6 @@ modelling decisions; `src/` is the production implementation of them.
 ```bash
 make lint    # ruff + black --check + mypy
 make test    # pytest with coverage gate
-make train   # Prefect training flow (local MLflow store in ./mlruns)
+make train   # Prefect training flow (local MLflow store: ./mlflow.db + ./mlartifacts)
 make serve   # FastAPI on :8000
 ```

@@ -9,7 +9,7 @@ help:
 	@echo "make repro      - dvc repro (retrain only if data/code changed)"
 	@echo "make serve      - FastAPI on :8000 with autoreload"
 	@echo "make drift BATCH=new.csv - PSI drift check against the trained bundle"
-	@echo "make mlflow-ui  - MLflow UI on :5000 over ./mlruns"
+	@echo "make mlflow-ui  - MLflow UI on :5000 over ./mlflow.db"
 	@echo "make up / down  - docker compose stack"
 
 install:
@@ -41,7 +41,7 @@ drift:
 	uv run python -m src.monitoring $(BATCH)
 
 mlflow-ui:
-	uv run mlflow ui --backend-store-uri ./mlruns --host 127.0.0.1 --port 5000
+	uv run mlflow ui --backend-store-uri sqlite:///mlflow.db --host 127.0.0.1 --port 5000
 
 up:
 	docker compose up -d --build

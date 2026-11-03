@@ -117,7 +117,7 @@ def trained_bundle_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
 def mlflow_tmp(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[str]:
     import mlflow
 
-    uri = (tmp_path / "mlruns").as_uri()
+    uri = f"sqlite:///{(tmp_path / 'mlflow.db').as_posix()}"
     monkeypatch.setattr(settings, "mlflow_tracking_uri", uri)
     mlflow.set_tracking_uri(uri)
     yield uri

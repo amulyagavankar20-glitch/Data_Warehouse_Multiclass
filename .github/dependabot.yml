@@ -13,9 +13,6 @@ updates:
     groups:
       ml-stack:
         patterns: ["mlflow", "lightgbm", "scikit-learn", "prefect"]
-    ignore:
-      - dependency-name: "fastapi"
-        versions: [">=0.155"]
 
   - package-ecosystem: "docker"
     directory: "/"

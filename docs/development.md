@@ -29,7 +29,7 @@ uv run pre-commit install  # ruff, black, mypy and hygiene hooks on commit
 | `make repro` | `dvc repro`: retrain only if data or code changed |
 | `make serve` | API with autoreload on :8000 |
 | `make drift BATCH=file.csv` | PSI drift report |
-| `make mlflow-ui` | MLflow UI over `./mlruns` on :5000 |
+| `make mlflow-ui` | MLflow UI over `./mlflow.db` on :5000 |
 
 ## Tests
 
@@ -89,9 +89,10 @@ flowchart LR
 | Dependabot | Weekly | Actions, uv and Docker base-image updates |
 
 > [!IMPORTANT]
-> FastAPI is pinned to `<0.155` because newer releases break Prefect 3.8's
-> server. Dependabot ignores those versions; lift the pin only after a
-> compatible Prefect release.
+> Keep MLflow at **3.11 or newer**. Older releases carry critical CVEs (path
+> traversal, command injection, authentication bypass) that the Trivy gate
+> rejects. Prefect must be **3.9 or newer**, because 3.8's server breaks on
+> FastAPI 0.160+.
 
 ## Making changes
 

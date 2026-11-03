@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     model_dir: Path = PROJECT_ROOT / "models"
     reports_dir: Path = PROJECT_ROOT / "reports"
 
-    mlflow_tracking_uri: str = (PROJECT_ROOT / "mlruns").as_uri()
+    mlflow_tracking_uri: str = f"sqlite:///{(PROJECT_ROOT / 'mlflow.db').as_posix()}"
     mlflow_experiment_name: str = "disease-anomaly"
     mlflow_model_name: str = "disease-anomaly-classifier"
     mlflow_champion_alias: str = "champion"

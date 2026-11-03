@@ -27,17 +27,17 @@ jobs:
       MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
       ENVIRONMENT: ci-training
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
         with:
           version: "0.11.14"
           enable-cache: true
       - run: uv sync --frozen --no-dev --python 3.11
       - name: Train, evaluate, gate, register
         run: |
-          export MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI:-file://$GITHUB_WORKSPACE/mlruns}"
+          export MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI:-sqlite:///$GITHUB_WORKSPACE/mlflow.db}"
           uv run python run_pipeline.py --min-auc "${{ inputs.min_auc || '0.90' }}"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: training-${{ github.run_id }}

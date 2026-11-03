@@ -2,16 +2,23 @@
 FROM python:3.11-slim
 
 ENV PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    MLFLOW_DISABLE_AGENT_HINT=1 \
+    MLFLOW_ALLOWED_HOSTS="mlflow,mlflow:5000,localhost,localhost:5000,127.0.0.1,127.0.0.1:5000"
 
-RUN pip install mlflow==2.22.5 psycopg2-binary==2.9.13 \
+# prometheus-flask-exporter is required by --expose-prometheus and is not a
+# dependency of mlflow 3.x; without it the server fails at startup.
+RUN pip install mlflow==3.17.2 psycopg2-binary==2.9.13 prometheus-flask-exporter==0.23.2 \
     && useradd --create-home --uid 1000 mlflow \
-    && mkdir -p /mlartifacts && chown mlflow:mlflow /mlartifacts
+    && mkdir -p /mlartifacts /tmp/mlflow-metrics \
+    && chown mlflow:mlflow /mlartifacts /tmp/mlflow-metrics
 
 USER mlflow
 EXPOSE 5000
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \
+HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=5 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=4)"
 
-ENTRYPOINT ["sh", "-c", "exec mlflow server --backend-store-uri \"$MLFLOW_BACKEND_STORE_URI\" --artifacts-destination /mlartifacts --serve-artifacts --host 0.0.0.0 --port 5000 --workers 2 --expose-prometheus /tmp/mlflow-metrics"]
+# --allowed-hosts: mlflow 3 validates the Host header and rejects other
+# containers that address the server by its service name unless listed.
+ENTRYPOINT ["sh", "-c", "exec mlflow server --backend-store-uri \"$MLFLOW_BACKEND_STORE_URI\" --artifacts-destination /mlartifacts --serve-artifacts --host 0.0.0.0 --port 5000 --workers 2 --allowed-hosts \"$MLFLOW_ALLOWED_HOSTS\" --expose-prometheus /tmp/mlflow-metrics"]

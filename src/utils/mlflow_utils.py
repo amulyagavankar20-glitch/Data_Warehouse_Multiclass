@@ -20,10 +20,27 @@ logger = logging.getLogger(__name__)
 PROMOTION_METRIC = "test_roc_auc_macro"
 
 
+def local_artifact_root(tracking_uri: str) -> str | None:
+    """For a SQLite backend, keep artifacts beside the database file.
+
+    MLflow otherwise defaults to ``./mlruns`` relative to the current working
+    directory, which scatters artifacts depending on where a run is launched.
+    Remote servers (``http(s)://``) manage their own artifact store.
+    """
+    prefix = "sqlite:///"
+    if not tracking_uri.startswith(prefix):
+        return None
+    db_path = Path(tracking_uri[len(prefix) :])
+    return (db_path.parent / "mlartifacts").resolve().as_uri()
+
+
 def setup_mlflow(tracking_uri: str | None = None) -> str:
     uri = tracking_uri or settings.mlflow_tracking_uri
     mlflow.set_tracking_uri(uri)
-    mlflow.set_experiment(settings.mlflow_experiment_name)
+    name = settings.mlflow_experiment_name
+    if mlflow.get_experiment_by_name(name) is None:
+        mlflow.create_experiment(name, artifact_location=local_artifact_root(uri))
+    mlflow.set_experiment(name)
     return uri
 
 
@@ -76,7 +93,7 @@ def log_model_bundle(
     from src.serving.pyfunc import DiseaseModel
 
     info = mlflow.pyfunc.log_model(
-        artifact_path="model",
+        name="model",
         python_model=DiseaseModel(),
         artifacts={"bundle": str(bundle_path)},
         code_paths=[str(PROJECT_ROOT / "src")],

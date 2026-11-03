@@ -111,7 +111,7 @@ docker compose --profile train run --rm trainer
 | :-- | :-- |
 | Modelling | LightGBM, scikit-learn |
 | Orchestration | Prefect 3 |
-| Tracking & registry | MLflow 2 (Postgres backend, alias-based promotion) |
+| Tracking & registry | MLflow 3 (Postgres backend, alias-based promotion) |
 | Pipeline versioning | DVC |
 | Serving | FastAPI + uvicorn, non-root multi-stage Docker image |
 | Monitoring | Prometheus, Grafana, PSI drift CLI |
