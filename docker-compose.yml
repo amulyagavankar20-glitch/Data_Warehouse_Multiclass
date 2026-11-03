@@ -1,0 +1,110 @@
+# Local production-like stack.
+#   docker compose up -d                      # registry, API, monitoring
+#   docker compose --profile train run --rm trainer   # train + register a model
+# Credentials come from .env (copy .env.example); defaults are for local use only.
+
+x-mlflow-env: &mlflow-env
+  MLFLOW_TRACKING_URI: http://mlflow:5000
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mlflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mlflow}
+      POSTGRES_DB: ${POSTGRES_DB:-mlflow}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MLFLOW_BACKEND_STORE_URI: postgresql://${POSTGRES_USER:-mlflow}:${POSTGRES_PASSWORD:-mlflow}@postgres:5432/${POSTGRES_DB:-mlflow}
+    volumes:
+      - mlflow_artifacts:/mlartifacts
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+
+  prefect:
+    image: prefecthq/prefect:3.8.8-python3.11
+    command: prefect server start --host 0.0.0.0 --port 4200
+    environment:
+      PREFECT_UI_API_URL: http://localhost:4200/api
+    volumes:
+      - prefect_data:/root/.prefect
+    ports:
+      - "4200:4200"
+    restart: unless-stopped
+
+  trainer:
+    build: .
+    profiles: ["train"]
+    command: ["python", "run_pipeline.py"]
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    environment:
+      <<: *mlflow-env
+      PREFECT_API_URL: http://prefect:4200/api
+    volumes:
+      - ./data:/app/data:ro
+      - ./models:/app/models
+      - ./reports:/app/reports
+
+  api:
+    build: .
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    environment:
+      <<: *mlflow-env
+      MODEL_URI: ${MODEL_URI:-}
+    volumes:
+      - ./models:/app/models:ro
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus_alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./.grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./.grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  mlflow_artifacts:
+  prefect_data:
+  prometheus_data:
+  grafana_data:

@@ -1,0 +1,17 @@
+# MLflow tracking server + model registry (Postgres backend, proxied artifact store).
+FROM python:3.11-slim
+
+ENV PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+RUN pip install mlflow==2.22.5 psycopg2-binary==2.9.13 \
+    && useradd --create-home --uid 1000 mlflow \
+    && mkdir -p /mlartifacts && chown mlflow:mlflow /mlartifacts
+
+USER mlflow
+EXPOSE 5000
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=4)"
+
+ENTRYPOINT ["sh", "-c", "exec mlflow server --backend-store-uri \"$MLFLOW_BACKEND_STORE_URI\" --artifacts-destination /mlartifacts --serve-artifacts --host 0.0.0.0 --port 5000 --workers 2 --expose-prometheus /tmp/mlflow-metrics"]

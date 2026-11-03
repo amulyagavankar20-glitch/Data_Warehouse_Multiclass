@@ -1,0 +1,33 @@
+# Reproducible training pipeline: `uv run dvc repro` re-trains only when the
+# data or code changed; `uv run dvc metrics diff` compares against HEAD.
+# The raw CSV stays tracked in git; the model bundle is cached by DVC.
+
+stages:
+  train:
+    cmd: python run_pipeline.py
+    deps:
+      - data/Data Warehouse Multiclass.csv
+      - run_pipeline.py
+      - flows/training_flow.py
+      - src/config.py
+      - src/data
+      - src/features
+      - src/models
+      - src/monitoring
+      - src/serving
+    outs:
+      - models/bundle.joblib
+      - models/serving_contract.json:
+          cache: false
+      - reports/anomaly_audit.json:
+          cache: false
+      - reports/feature_importance.json:
+          cache: false
+    metrics:
+      - reports/metrics.json:
+          cache: false
+      - reports/drift.json:
+          cache: false
+    plots:
+      - reports/confusion_matrix.png:
+          cache: false

@@ -1,0 +1,38 @@
+groups:
+  - name: disease-api
+    rules:
+      - alert: DiseaseApiDown
+        expr: up{job="disease-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Disease API scrape target is down
+
+      - alert: DiseaseApiHighErrorRate
+        expr: |
+          sum(rate(http_requests_total{job="disease-api",status=~"5.."}[5m]))
+            / clamp_min(sum(rate(http_requests_total{job="disease-api"}[5m])), 1e-9) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: More than 5% of API requests are failing
+
+      - alert: DiseaseApiSlowPredictions
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(http_request_duration_seconds_bucket{endpoint="/predict"}[5m]))) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: p95 /predict latency above 500 ms
+
+      - alert: DiseaseApiNoModel
+        expr: absent(model_info{job="disease-api"})
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: API is running without a loaded model (serving 503s)

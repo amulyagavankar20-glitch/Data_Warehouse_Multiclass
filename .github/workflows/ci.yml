@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  UV_VERSION: "0.11.14"
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
+      - run: uv run ruff check src tests flows run_pipeline.py
+      - run: uv run black --check src tests flows run_pipeline.py
+      - run: uv run mypy src flows
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
+      - name: Unit + integration tests (coverage gate 80%)
+        run: uv run pytest --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage.xml
+
+  pipeline-integrity:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+      - run: uv sync --frozen --python ${{ env.PYTHON_VERSION }}
+      - name: Validate DVC pipeline graph
+        run: uv run dvc dag
+      - name: Validate raw data contract
+        run: |
+          uv run python -c "
+          from src.data.loader import load_raw_data
+          from src.data.validator import validate_data
+          r = validate_data(load_raw_data())
+          print('warnings:', r.warnings)
+          assert r.passed, r.errors
+          "
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: disease-api:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build MLflow image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.mlflow
+          tags: disease-mlflow:ci
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: disease-api:ci
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+      - name: Container smoke test
+        run: |
+          docker run -d --name api -p 8000:8000 disease-api:ci
+          for i in $(seq 1 30); do
+            curl -fs http://localhost:8000/health && break
+            sleep 2
+          done
+          curl -fs http://localhost:8000/health
+          curl -fs http://localhost:8000/metrics | grep -q http_requests_total
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/ready)" = "503"
+      - if: failure()
+        run: docker logs api

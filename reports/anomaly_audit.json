@@ -1,0 +1,58 @@
+{
+  "DI_HY": {
+    "count": 9971,
+    "mean_iso_score": 0.028651968751013494,
+    "mean_ocsvm_score": 1.511907345221822,
+    "iso_flag_rate": 0.14682579480493432,
+    "ocsvm_flag_rate": 0.3428943937418514
+  },
+  "HY": {
+    "count": 10468,
+    "mean_iso_score": 0.0423791095163736,
+    "mean_ocsvm_score": 4.563674214333943,
+    "iso_flag_rate": 0.08091325945739396,
+    "ocsvm_flag_rate": 0.16517004203286206
+  },
+  "DI": {
+    "count": 4786,
+    "mean_iso_score": 0.042499414582318915,
+    "mean_ocsvm_score": 2.4155635433113,
+    "iso_flag_rate": 0.11888842457166736,
+    "ocsvm_flag_rate": 0.34120351023819473
+  },
+  "DI_HT_HY": {
+    "count": 126,
+    "mean_iso_score": 0.0870320485478328,
+    "mean_ocsvm_score": 0.7554383103023444,
+    "iso_flag_rate": 0.0,
+    "ocsvm_flag_rate": 0.5634920634920635
+  },
+  "HT_HY": {
+    "count": 160,
+    "mean_iso_score": 0.09342108324641338,
+    "mean_ocsvm_score": 5.886556962478401,
+    "iso_flag_rate": 0.0,
+    "ocsvm_flag_rate": 0.40625
+  },
+  "DI_HT": {
+    "count": 209,
+    "mean_iso_score": 0.09349577997233131,
+    "mean_ocsvm_score": 3.7216643574268975,
+    "iso_flag_rate": 0.0,
+    "ocsvm_flag_rate": 0.41626794258373206
+  },
+  "N": {
+    "count": 15698,
+    "mean_iso_score": 0.10136721523679462,
+    "mean_ocsvm_score": 11.694440898319444,
+    "iso_flag_rate": 0.05000637023824691,
+    "ocsvm_flag_rate": 0.05656771563256466
+  },
+  "HT": {
+    "count": 388,
+    "mean_iso_score": 0.10924196437586933,
+    "mean_ocsvm_score": 13.110108109539828,
+    "iso_flag_rate": 0.007731958762886598,
+    "ocsvm_flag_rate": 0.17010309278350516
+  }
+}

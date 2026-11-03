@@ -1,0 +1,75 @@
+schema: '2.0'
+stages:
+  train:
+    cmd: python run_pipeline.py
+    deps:
+    - path: data/Data Warehouse Multiclass.csv
+      hash: md5
+      md5: d5a62fdcaa15e5d870d7000893c527ca
+      size: 94114481
+    - path: flows/training_flow.py
+      hash: md5
+      md5: aa44b2ab84d4bd0057d7ed5d33dec463
+      size: 10478
+    - path: run_pipeline.py
+      hash: md5
+      md5: 1668eabcbc29c18b301391a0d616d925
+      size: 1368
+    - path: src/config.py
+      hash: md5
+      md5: c4216ff8d395eea6a8998f839a81c2ba
+      size: 5518
+    - path: src/data
+      hash: md5
+      md5: 0513cf39a67e5ad5327685079b84e540.dir
+      size: 8677
+      nfiles: 4
+    - path: src/features
+      hash: md5
+      md5: 66bd9dd3a4406a00ea54294aed20ae25.dir
+      size: 3761
+      nfiles: 2
+    - path: src/models
+      hash: md5
+      md5: 4b212b6778381fd43a51a50702ed3bb9.dir
+      size: 17950
+      nfiles: 7
+    - path: src/monitoring
+      hash: md5
+      md5: dab109e99314e7cbf3cf875da3e0a7c3.dir
+      size: 4303
+      nfiles: 3
+    - path: src/serving
+      hash: md5
+      md5: 93d7e8ece1a412d10fa28c8602e2ee1e.dir
+      size: 5532
+      nfiles: 3
+    outs:
+    - path: models/bundle.joblib
+      hash: md5
+      md5: 96d632cec15ba6526cdc2d3e5f239ebb
+      size: 14103936
+    - path: models/serving_contract.json
+      hash: md5
+      md5: ec7620402e199ea0d85ba3d224ec8e54
+      size: 4719
+    - path: reports/anomaly_audit.json
+      hash: md5
+      md5: d5cacd5936771483ac25217e5a23920d
+      size: 1652
+    - path: reports/confusion_matrix.png
+      hash: md5
+      md5: 696b1f8f5581d0260f218144a9607e2a
+      size: 70544
+    - path: reports/drift.json
+      hash: md5
+      md5: dac2ad9f43121c7112a3b3ab521da21c
+      size: 1031
+    - path: reports/feature_importance.json
+      hash: md5
+      md5: c1ba1d3b70e968023156af18e926eeb4
+      size: 2067
+    - path: reports/metrics.json
+      hash: md5
+      md5: 13a208fd447138ce7483fc9d0cbb1523
+      size: 1810

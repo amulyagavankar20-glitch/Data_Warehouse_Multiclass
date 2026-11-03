@@ -1,2 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+
+# Environments / secrets
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Tooling caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# MLflow local store
+mlruns/
+mlartifacts/
+mlflow.db
+
+# DVC-cached model artifacts (small reports/contract are git-tracked)
+/models/bundle.joblib
+
+# Jupyter
 .ipynb_checkpoints/
+
+# Local agent / IDE / OS
 .kilo/
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
