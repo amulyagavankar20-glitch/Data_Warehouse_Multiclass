@@ -37,7 +37,7 @@ jobs:
         run: |
           export MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI:-file://$GITHUB_WORKSPACE/mlruns}"
           uv run python run_pipeline.py --min-auc "${{ inputs.min_auc || '0.90' }}"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: training-${{ github.run_id }}
