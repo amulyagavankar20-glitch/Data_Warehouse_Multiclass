@@ -75,6 +75,8 @@ class Settings(BaseSettings):
             "min_child_samples": 20,
             "verbose": -1,
             "seed": self.random_state,
+            "deterministic": True,
+            "force_row_wise": True,
             "n_jobs": -1,
         }
 

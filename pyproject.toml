@@ -3,6 +3,11 @@ name = "disease-anomaly-early-warning"
 version = "1.0.0"
 description = "Production MLOps pipeline for multi-class disease detection and early-warning anomaly scoring"
 readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Amulya Gavankar" },
+    { name = "Krish Kamra" },
+]
 requires-python = ">=3.11,<3.13"
 dependencies = [
     "pandas>=2.2,<3",

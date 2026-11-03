@@ -32,7 +32,7 @@ def main() -> int:
     payload = json.dumps(report.to_dict(), indent=2)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(payload, encoding="utf-8")
+        args.output.write_text(payload + "\n", encoding="utf-8", newline="\n")
     print(payload)
     return 2 if report.drifted_features else 0
 

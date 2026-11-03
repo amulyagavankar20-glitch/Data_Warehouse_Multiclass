@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Multi-Class Disease Detection & Early-Warning Anomaly Pipeline"
+abstract: >-
+  Production MLOps pipeline that predicts 8-class diabetes / heart disease /
+  hypertension comorbidity sublabels from routine biomarkers with a
+  leakage-free, cost-sensitive LightGBM model, and scores deviation from a
+  healthy baseline with IsolationForest and One-Class SVM detectors.
+type: software
+authors:
+  - given-names: Amulya
+    family-names: Gavankar
+  - given-names: Krish
+    family-names: Kamra
+repository-code: "https://github.com/amulyagavankar20-glitch/Data_Warehouse_Multiclass"
+license: MIT
+version: 1.0.0
+date-released: "2026-11-03"
+keywords:
+  - mlops
+  - machine-learning
+  - anomaly-detection
+  - lightgbm
+  - healthcare
+  - mlflow

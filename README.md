@@ -11,6 +11,8 @@ they deviate from a healthy baseline, served behind a monitored API.**
 ![MLflow](https://img.shields.io/badge/registry-MLflow-0194E2?logo=mlflow&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/serving-FastAPI-009688?logo=fastapi&logoColor=white)
 ![Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Conventional Commits](https://img.shields.io/badge/commits-conventional-FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/)
 
 </div>
 
@@ -134,3 +136,24 @@ docs/                    project documentation
 reports/                 latest metrics, drift, anomaly audit (git-tracked)
 *.ipynb                  research notebooks (EDA, model benchmark)
 ```
+
+## Contributing & community
+
+| | |
+| :-- | :-- |
+| [Contributing guide](CONTRIBUTING.md) | Workflow, commit conventions, PR checklist |
+| [Code of Conduct](CODE_OF_CONDUCT.md) | Contributor Covenant 2.1 |
+| [Security policy](SECURITY.md) | Private vulnerability reporting, hardening notes |
+| [Support](SUPPORT.md) | Where to get help |
+| [Changelog](CHANGELOG.md) | Release history |
+| [Citation](CITATION.cff) | How to cite this project |
+
+## License
+
+The code and documentation are released under the [MIT License](LICENSE).
+
+> [!WARNING]
+> The license does **not** cover the dataset in `data/`, which remains subject
+> to the terms of its original source. Model artifacts trained on it inherit
+> those terms. This software is not a medical device; see the
+> [model card](docs/model-card.md).

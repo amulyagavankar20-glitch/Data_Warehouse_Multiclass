@@ -1,0 +1,59 @@
+name: Bug report
+description: Something in the pipeline, API or infrastructure is broken.
+title: "fix: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Do not include real patient data**, and report
+        security issues through [SECURITY.md](https://github.com/amulyagavankar20-glitch/Data_Warehouse_Multiclass/blob/master/SECURITY.md) instead.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - API / serving
+        - Training flow / model
+        - Data validation / features
+        - Drift monitoring
+        - Docker / Compose
+        - CI/CD
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Include the full error message or traceback.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Commands, request payload (synthetic values only) or a minimal script.
+      placeholder: |
+        1. uv sync
+        2. make train
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit / image tag / model_version
+      placeholder: "8f189f6 · ghcr.io/…:8f189f6 · 20261103T140735Z-9705890"
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "OS, Python version, Docker version"

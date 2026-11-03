@@ -1,0 +1,8 @@
+# Normalise to LF everywhere. Keeps Docker builds, shell scripts and DVC
+# content hashes identical across Windows, macOS and Linux checkouts.
+* text=auto eol=lf
+
+*.png     binary
+*.jpg     binary
+*.joblib  binary
+*.pkl     binary

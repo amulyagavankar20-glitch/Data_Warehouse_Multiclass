@@ -3,7 +3,7 @@
 | | |
 | :-- | :-- |
 | **Model type** | LightGBM multi-class GBDT (8 classes) + IsolationForest and One-Class SVM anomaly detectors |
-| **Version** | `20261103T140735Z-9705890` (see `/health` for the deployed version) |
+| **Version** | `20261103T144410Z-8f189f6` (see `/health` for the deployed version) |
 | **Training data** | 195,090 patients (70% of the 278,701 deduplicated records) |
 | **Evaluation data** | 41,806-patient held-out test fold, stratified by sublabel |
 | **Owner** | Data Warehouse Multiclass project |
@@ -29,7 +29,7 @@
 | Split | Stratified 70 / 15 / 15 (train / validation / test), seed 42 |
 | Imbalance handling | Balanced sample weights (0.33 for `N` to 41.2 for `DI_HT_HY`); no oversampling |
 | Hyperparameters | `num_leaves=63`, `max_depth=7`, `learning_rate=0.05`, `feature_fraction=0.8`, `bagging_fraction=0.8`, `lambda_l1=1.5`, `lambda_l2=3.0` |
-| Boosting | Up to 600 rounds, early stopping (30) on validation multi-logloss |
+| Boosting | Up to 600 rounds, early stopping (30) on validation multi-logloss; `deterministic=True`, `force_row_wise=True` |
 | Decision rule | Arg-max; per-class threshold calibration was evaluated and rejected (val macro F1 0.353 vs 0.419) |
 | Anomaly detectors | Fitted on healthy (`N`) training patients only; IsolationForest 200 trees, contamination 0.05; OCSVM RBF, ν = 0.05, 10k-row subsample |
 
@@ -53,7 +53,7 @@
 | `DI_HY` | 9,971 | 0.724 | 0.816 | 0.767 |
 | `DI` | 4,786 | 0.439 | 0.293 | 0.351 |
 | `HT` | 388 | 0.103 | 0.536 | 0.173 |
-| `DI_HT` | 209 | 0.165 | 0.340 | 0.222 |
+| `DI_HT` | 209 | 0.166 | 0.340 | 0.223 |
 | `HT_HY` | 160 | 0.090 | 0.269 | 0.135 |
 | `DI_HT_HY` | 126 | 0.145 | 0.270 | 0.188 |
 
@@ -135,5 +135,7 @@
 uv sync --frozen && uv run dvc repro
 ```
 
-The pipeline is deterministic with fixed seeds: repeated runs reproduce
-`reports/metrics.json` exactly.
+Seeds are fixed and LightGBM runs in deterministic mode, so two consecutive
+runs on the same machine and dependency lock produce byte-identical
+`reports/*.json`. Across different CPUs or BLAS builds, expect agreement to
+about 6 significant digits.

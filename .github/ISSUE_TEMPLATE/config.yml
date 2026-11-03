@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Usage questions & documentation
+    url: https://github.com/amulyagavankar20-glitch/Data_Warehouse_Multiclass/blob/master/SUPPORT.md
+    about: Check the runbook, API spec and model card first.
+  - name: Security vulnerability
+    url: https://github.com/amulyagavankar20-glitch/Data_Warehouse_Multiclass/blob/master/SECURITY.md
+    about: Report privately. Do not open a public issue.

@@ -175,7 +175,11 @@ def quality_gate(metrics: dict[str, float], min_auc: float) -> None:
 
 def _write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, default=float), encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, default=float) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
 
 
 @flow(name="disease-anomaly-training")

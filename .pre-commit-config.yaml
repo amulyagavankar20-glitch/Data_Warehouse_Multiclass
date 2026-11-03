@@ -6,9 +6,9 @@ repos:
         args: [--unsafe]
       - id: check-toml
       - id: end-of-file-fixer
-        exclude: ^data/
+        exclude: ^data/|\.ipynb$
       - id: trailing-whitespace
-        exclude: ^data/
+        exclude: ^data/|\.ipynb$
       - id: check-added-large-files
         args: [--maxkb=2000]
       - id: check-merge-conflict
