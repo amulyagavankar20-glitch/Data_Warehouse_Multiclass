@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 # Serving + training image. Dependencies come from uv.lock for reproducible builds.
 
-FROM python:3.11-slim AS builder
+FROM python:3.15-slim AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:0.11.14 /uv /bin/uv
 
@@ -15,7 +15,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project
 
 
-FROM python:3.11-slim AS runtime
+FROM python:3.15-slim AS runtime
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libgomp1 \
